@@ -1,0 +1,58 @@
+parameters:
+    ok99_privatezone_translation.default.service.translation.class: Ok99\PrivateZoneCore\TranslationBundle\TranslationForm\TranslationForm
+    ok99_privatezone_translation.default.listener.translations.class: Ok99\PrivateZoneCore\TranslationBundle\Form\EventListener\TranslationsListener
+    ok99_privatezone_translation.default.listener.translationsForms.class: Ok99\PrivateZoneCore\TranslationBundle\Form\EventListener\TranslationsFormsListener
+    ok99_privatezone_translation.default.type.translations.class: Ok99\PrivateZoneCore\TranslationBundle\Form\Type\TranslationsType
+    ok99_privatezone_translation.default.type.translationsFields.class: Ok99\PrivateZoneCore\TranslationBundle\Form\Type\TranslationsFieldsType
+    ok99_privatezone_translation.default.type.translationsForms.class: Ok99\PrivateZoneCore\TranslationBundle\Form\Type\TranslationsFormsType
+    ok99_privatezone_translation.default.type.translationsLocalesSelector.class: Ok99\PrivateZoneCore\TranslationBundle\Form\Type\TranslationsLocalesSelectorType
+    ok99_privatezone_translation.default.type.translatedEntity.class: Ok99\PrivateZoneCore\TranslationBundle\Form\Type\TranslatedEntityType
+
+services:
+    ok99_privatezone_translation.default.service.translation:
+        class: %ok99_privatezone_translation.default.service.translation.class%
+        arguments: [@form.registry, @ok99_privatezone_translation.manager_registry]
+
+    ok99_privatezone_translation.default.listener.translations:
+        class: %ok99_privatezone_translation.default.listener.translations.class%
+        arguments: [@ok99_privatezone_translation.default.service.translation]
+
+    ok99_privatezone_translation.default.listener.translationsForms:
+        class: %ok99_privatezone_translation.default.listener.translationsForms.class%
+
+    ok99_privatezone_translation.default.type.translations:
+        class: %ok99_privatezone_translation.default.type.translations.class%
+        arguments: [@ok99_privatezone_translation.default.listener.translations, %ok99_privatezone_translation.locales%, %ok99_privatezone_translation.default_locale%, %ok99_privatezone_translation.required_locales%]
+        tags:
+            - { name: form.type, alias: ok99_privatezone_translations }
+
+    ok99_privatezone_translation.default.type.translationsFields:
+        class: %ok99_privatezone_translation.default.type.translationsFields.class%
+        tags:
+            - { name: form.type, alias: ok99_privatezone_translationsFields }
+
+    ok99_privatezone_translation.default.type.translationsForms:
+        class: %ok99_privatezone_translation.default.type.translationsForms.class%
+        arguments: [@ok99_privatezone_translation.default.service.translation, @ok99_privatezone_translation.default.listener.translationsForms, %ok99_privatezone_translation.locales%, %ok99_privatezone_translation.default_locale%, %ok99_privatezone_translation.required_locales%]
+        tags:
+            - { name: form.type, alias: ok99_privatezone_translationsForms }
+
+    ok99_privatezone_translation.default.type.translationsLocalesSelector:
+        class: %ok99_privatezone_translation.default.type.translationsLocalesSelector.class%
+        arguments: [%ok99_privatezone_translation.locales%, %ok99_privatezone_translation.default_locale%]
+        tags:
+            - { name: form.type, alias: ok99_privatezone_translationsLocalesSelector }
+
+    ok99_privatezone_translation.default.type.translatedEntity:
+        class: %ok99_privatezone_translation.default.type.translatedEntity.class%
+        calls:
+            - [ setRequest, [@request_stack] ]
+        tags:
+            - { name: form.type, alias: ok99_privatezone_translatedEntity }
+
+    ok99_privatezone_translation.language_token.repository:
+        class:           Doctrine\ORM\EntityRepository
+        factory_service: doctrine.orm.entity_manager
+        factory_method:  getRepository
+        arguments: [Ok99\PrivateZoneCore\TranslationBundle\Entity\LanguageToken]
+
